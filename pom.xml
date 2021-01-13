@@ -16,6 +16,9 @@
 
 	<properties>
 		<java.version>11</java.version>
+		<flyway_schema_table>flyway_schema_history</flyway_schema_table>
+		<flyway_out_of_order>true</flyway_out_of_order>
+		<mysql.database>lookup_service</mysql.database>
 	</properties>
 
 	<dependencies>
@@ -47,6 +50,17 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -66,4 +80,49 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>development</id>
+			<build>
+				<plugins>
+					<!-- Create the Database using flywaydb-->
+					<plugin>
+						<groupId>org.flywaydb</groupId>
+						<artifactId>flyway-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>migrate</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<url>jdbc:mysql://localhost:3306/information_schema
+							</url><!-- specify initial schema since Flyway will fail if it can't restore to default schema -->
+							<user>${mysql.user}</user>
+							<password>${mysql.password}</password>
+							<connectRetries>30
+							</connectRetries><!-- wait up to 30 seconds for MySQL to become available -->
+							<table>${flyway_schema_table}</table>
+							<outOfOrder>${flyway_out_of_order}</outOfOrder>
+							<ignoreMissingMigrations>true</ignoreMissingMigrations>
+							<baselineOnMigrate>true</baselineOnMigrate>
+							<baselineVersion>2</baselineVersion><!-- include baseline schema & data -->
+							<schemas>
+								<schema>${mysql.database}</schema>
+							</schemas>
+						</configuration>
+						<dependencies>
+							<dependency>
+								<groupId>mysql</groupId>
+								<artifactId>mysql-connector-java</artifactId>
+								<version>8.0.17</version>
+							</dependency>
+						</dependencies>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

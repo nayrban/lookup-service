@@ -9,34 +9,34 @@ import com.katas.lookupservice.dto.ThinqCredentialsResponse;
 import com.katas.lookupservice.exception.RequestException;
 import com.katas.lookupservice.repository.LookupRepository;
 import com.katas.lookupservice.utils.ThinQActions;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.web.client.RestTemplate;
-
-@Slf4j
 @Service
-public class LookupService {
+public class OldLookupService {
 
     // <editor-fold  desc="Attributes">
     private LookupRepository lookupRepository;
+    private Logger logger = LoggerFactory.getLogger(OldLookupService.class);
     private RestTemplate restTemplate;
 
     // </editor-fold>
 
     // <editor-fold  desc="Constructor">
     @Autowired
-    public LookupService(LookupRepository lookupRepository, RestTemplate restTemplate) {
+    public OldLookupService(LookupRepository lookupRepository, RestTemplate restTemplate) {
         this.lookupRepository = lookupRepository;
         this.restTemplate = restTemplate;
     }
@@ -46,7 +46,7 @@ public class LookupService {
     // <editor-fold  desc="Methods">
 
     public List<Lookup> createLookupCredentialsConfiguration(CredentialsLookup credentialsLookup) {
-        log.info("Call to: LookupService.createLookupCredentialsConfiguration()");
+        this.logger.info("Call to: LookupService.createLookupCredentialsConfiguration()");
         List<Lookup> list = new ArrayList<>();
 
         try {
@@ -67,7 +67,7 @@ public class LookupService {
             list.add(emailLookup);
             list.add(passwordLookup);
         } catch (Exception e) {
-          log.warn("Exception in: LookupService.createLookupCredentialsConfiguration()");
+          this.logger.warn("Exception in: LookupService.createLookupCredentialsConfiguration()");
           throw new RequestException("bob.error.LookupService.createLookupCredentialsConfiguration", e.getMessage());
         }
 
@@ -75,7 +75,7 @@ public class LookupService {
     }
 
     public List<Lookup> createThinqLookupCredentialsConfiguration(ThinqCredentialsLookup createThinqCredentialsLookup) {
-        log.info("Call to: LookupService.createThinqLookupCredentialsConfiguration()");
+        this.logger.info("Call to: LookupService.createThinqLookupCredentialsConfiguration()");
         List<Lookup> list = new ArrayList<>();
 
         try {
@@ -124,7 +124,7 @@ public class LookupService {
 
                    this.lookupRepository.save(ipAddressLookup);
                 }catch (Exception e){
-                    log.warn("Exception in: LookupService.createThinqLookupCredentialsConfiguration()");
+                    this.logger.warn("Exception in: LookupService.createThinqLookupCredentialsConfiguration()");
                     throw new RequestException("bob.error.LookupService.createThinqLookupCredentialsConfiguration","Error in createThinqLookupCredentialsConfiguration() -> " + e.getCause());
                 }
             }
@@ -134,7 +134,7 @@ public class LookupService {
             list.add(tokenLookup);
             list.add(ipAddressLookup);
         } catch (Exception e) {
-            log.warn("Exception in: ACWController.createThinqLookupCredentialsConfiguration()");
+            this.logger.warn("Exception in: ACWController.createThinqLookupCredentialsConfiguration()");
             throw new RequestException("bob.error.LookupService.createThinqLookupCredentialsConfiguration", e.getMessage());
         }
 
@@ -142,24 +142,25 @@ public class LookupService {
     }
 
     public List<Lookup> getLookupListFromCategory(String category) {
-        log.info("Call to: LookupService.getLookupListFromCategory()");
+        this.logger.info("Call to: LookupService.getLookupListFromCategory()");
         List<Lookup> list = null;
         try {
             list = this.lookupRepository.findByCategoryAndDeletedFalseOrderByOrdinalAsc(category);
         } catch (Exception e) {
-          log.warn("Exception in: LookupService.getLookupListFromCategory()");
+          this.logger.warn("Exception in: LookupService.getLookupListFromCategory()");
            throw new RequestException("bob.error.LookupService.getLookupListFromCategory", e.getMessage());
         }
         return list;
     }
 
     public Optional<Lookup> getLookupById(Long id) {
-        log.info("Call to: LookupService.getLookupById()");
-        Optional<Lookup> result;
+        this.logger.info("Call to: LookupService.getLookupById()");
+        //TODO un Optional nunca debe ser nulo, Optional es o ausente o present
+        Optional<Lookup> result = null;
         try {
             result = this.lookupRepository.findById(id);
         } catch (Exception e) {
-            log.warn("Exception in: LookupService.getLookupById()");
+            this.logger.warn("Exception in: LookupService.getLookupById()");
             throw new RequestException("bob.error.LookupService.getLookupById", e.getMessage());
         }
 
@@ -167,12 +168,12 @@ public class LookupService {
     }
 
     public Lookup getLookupByName(String name, String category) {
-        log.info("Call to: LookupService.getLookupByName()");
+        this.logger.info("Call to: LookupService.getLookupByName()");
         Lookup result = null;
         try {
             result = this.lookupRepository.findByNameAndCategory(name, category);
         } catch (Exception e) {
-            log.warn("Exception in: LookupService.getLookupByName()");
+            this.logger.warn("Exception in: LookupService.getLookupByName()");
             throw new RequestException("bob.error.LookupService.getLookupByName", e.getMessage());
         }
 
@@ -180,12 +181,12 @@ public class LookupService {
     }
 
     public Lookup getLookupByValue(Long value, String category) {
-        log.info("Call to: LookupService.getLookupByValue()");
+        this.logger.info("Call to: LookupService.getLookupByValue()");
         Lookup result = null;
         try {
             result = this.lookupRepository.findByOrdinalAndCategory(value, category);
         } catch (Exception e) {
-            log.warn("Exception in: LookupService.getLookupByValue()");
+            this.logger.warn("Exception in: LookupService.getLookupByValue()");
             throw new RequestException("bob.error.LookupService.getLookupByValue", e.getMessage());
         }
 
@@ -193,7 +194,7 @@ public class LookupService {
     }
 
     public EmailCredentialsResponse getEmailCredentials() {
-        log.info("Call to: LookupService.getEmailCredentials()");
+        this.logger.info("Call to: LookupService.getEmailCredentials()");
         EmailCredentialsResponse result = null;
         try {
             Lookup emailLookup = getLookupByName("EMAIL", "EMAIL_CONFIGURATION");
@@ -202,7 +203,7 @@ public class LookupService {
             result = new EmailCredentialsResponse(emailLookup.getValue(), passwordLookup.getValue());
 
         } catch (Exception e) {
-            log.warn("Exception in: LookupService.getEmailCredentials()");
+            this.logger.warn("Exception in: LookupService.getEmailCredentials()");
             throw new RequestException("bob.error.LookupService.getEmailCredentials", e.getMessage());
         }
 
@@ -210,7 +211,7 @@ public class LookupService {
     }
 
     public ThinqCredentialsResponse getThinqCredentials() {
-        log.info("Call to: LookupService.getThinqCredentials()");
+        this.logger.info("Call to: LookupService.getThinqCredentials()");
         ThinqCredentialsResponse result = null;
         try {
             Lookup usernameLookup = getLookupByName("USERNAME", "THINQ_CONFIGURATION");
@@ -221,7 +222,7 @@ public class LookupService {
             result = new ThinqCredentialsResponse(usernameLookup.getValue(), accounIdLookup.getValue(), tokenLookup.getValue(), ipAddressLookup.getValue());
 
         } catch (Exception e) {
-            log.warn("Exception in: LookupService.getThinqCredentials()");
+            this.logger.warn("Exception in: LookupService.getThinqCredentials()");
 
             throw new RequestException("bob.error.LookupService.getThinqCredentials", e.getMessage());
         }
@@ -230,14 +231,14 @@ public class LookupService {
     }
 
     public String getThinqURLByAction(String action) {
-        log.info("Call to: LookupService.getThinqURLByAction()");
+        this.logger.info("Call to: LookupService.getThinqURLByAction()");
         String result = null;
         try {
 
             result = getLookupByName(action, "THINQ_CONFIGURATION").getValue();
 
         } catch (Exception e) {
-            log.warn("Exception in: LookupService.getThinqURLByAction()");
+            this.logger.warn("Exception in: LookupService.getThinqURLByAction()");
 
             throw new RequestException("bob.error.LookupService.getThinqURLByAction", e.getMessage());
         }

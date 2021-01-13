@@ -1,17 +1,21 @@
 package com.katas.lookupservice.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
+@Table(name = "LOOKUP")
 public class Lookup {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
     private String value;
     private String category;
     private Long ordinal;
+    @Column(name = "MODIFIED_BY")
     private Long modifiedBy;
+    @Column(name = "MODIFIED_DATE")
     private Date modifiedDate;
 
     private Boolean deleted;
@@ -20,10 +24,10 @@ public class Lookup {
         this.id = id;
     }
 
-    @Id
     public Long getId() {
         return id;
     }
+
 
     public String getName() {
         return name;
