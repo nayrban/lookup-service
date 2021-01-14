@@ -27,8 +27,8 @@ import java.util.Optional;
 public class LookupService {
 
     // <editor-fold  desc="Attributes">
-    private LookupRepository lookupRepository;
-    private RestTemplate restTemplate;
+    private final LookupRepository lookupRepository;
+    private final RestTemplate restTemplate;
 
     // </editor-fold>
 
@@ -48,13 +48,13 @@ public class LookupService {
         List<Lookup> list = new ArrayList<>();
 
         try {
-            Lookup emailLookup = getLookupByName("EMAIL", "EMAIL_CONFIGURATION");
+            Lookup emailLookup = findByName("EMAIL", "EMAIL_CONFIGURATION");
             emailLookup.setValue(credentialsLookup.getEmail());
             emailLookup.setModifiedBy(credentialsLookup.getCreatedBy());
 
             this.lookupRepository.save(emailLookup);
 
-            Lookup passwordLookup = getLookupByName("PASSWORD", "EMAIL_CONFIGURATION");
+            Lookup passwordLookup = findByName("PASSWORD", "EMAIL_CONFIGURATION");
             passwordLookup.setValue(credentialsLookup.getPassword());
             passwordLookup.setModifiedBy(credentialsLookup.getCreatedBy());
 
@@ -75,25 +75,25 @@ public class LookupService {
         List<Lookup> list = new ArrayList<>();
 
         try {
-            Lookup usernameLookup = getLookupByName("USERNAME", "THINQ_CONFIGURATION");
+            Lookup usernameLookup = findByName("USERNAME", "THINQ_CONFIGURATION");
             usernameLookup.setValue(createThinqCredentialsLookup.getUsername());
             usernameLookup.setModifiedBy(createThinqCredentialsLookup.getCreatedBy());
 
             this.lookupRepository.save(usernameLookup);
 
-            Lookup accountIdLookup = getLookupByName("ACCOUNT ID", "THINQ_CONFIGURATION");
+            Lookup accountIdLookup = findByName("ACCOUNT ID", "THINQ_CONFIGURATION");
             accountIdLookup.setValue(createThinqCredentialsLookup.getAccountId());
             accountIdLookup.setModifiedBy(createThinqCredentialsLookup.getCreatedBy());
 
             this.lookupRepository.save(accountIdLookup);
 
-            Lookup tokenLookup = getLookupByName("TOKEN", "THINQ_CONFIGURATION");
+            Lookup tokenLookup = findByName("TOKEN", "THINQ_CONFIGURATION");
             tokenLookup.setValue(createThinqCredentialsLookup.getToken());
             tokenLookup.setModifiedBy(createThinqCredentialsLookup.getCreatedBy());
 
             this.lookupRepository.save(tokenLookup);
 
-            Lookup ipAddressLookup = getLookupByName("IP_ADDRESS", "THINQ_CONFIGURATION");
+            Lookup ipAddressLookup = findByName("IP_ADDRESS", "THINQ_CONFIGURATION");
             String oldIP = ipAddressLookup.getValue();
             if (createThinqCredentialsLookup.getIpAddress() != "-") {
                 ipAddressLookup.setValue(createThinqCredentialsLookup.getIpAddress());
@@ -133,38 +133,23 @@ public class LookupService {
         return list;
     }
 
-    public List<Lookup> getLookupListFromCategory(String category) {
+    public List<Lookup> findAllByCategory(String category) {
         log.info("Call to: LookupService.getLookupListFromCategory()");
-        List<Lookup> list = null;
-        try {
-            list = this.lookupRepository.findByCategoryAndDeletedFalseOrderByOrdinalAsc(category);
-        } catch (Exception e) {
-            log.warn("Exception in: LookupService.getLookupListFromCategory()");
-            throw new RequestException("bob.error.LookupService.getLookupListFromCategory", e.getMessage());
-        }
-        return list;
+        return this.lookupRepository.findByCategoryAndDeletedFalseOrderByOrdinalAsc(category);
     }
 
-    public Optional<Lookup> getLookupById(Long id) {
+    public Optional<Lookup> findById(Long id) {
         log.info("Call to: LookupService.getLookupById()");
-        Optional<Lookup> result;
-        try {
-            result = this.lookupRepository.findById(id);
-        } catch (Exception e) {
-            log.warn("Exception in: LookupService.getLookupById()");
-            throw new RequestException("bob.error.LookupService.getLookupById", e.getMessage());
-        }
-
-        return result;
+        return this.lookupRepository.findById(id);
     }
 
-    public Lookup getLookupByName(String name, String category) {
+    public Lookup findByName(String name, String category) {
         log.info("Call to: LookupService.getLookupByName()");
         //TODO we  have to update this inn the future
         return this.lookupRepository.findByNameAndCategory(name, category).orElse(null);
     }
 
-    public Lookup getLookupByValue(Long value, String category) {
+    public Lookup findByOrdinalAndCategory(Long value, String category) {
         return this.lookupRepository.findByOrdinalAndCategory(value, category)
                 .orElseThrow(() -> new RuntimeException(String.format("Lookup with ordinal %1d and category %2s not found", value, category)));
     }
@@ -173,8 +158,8 @@ public class LookupService {
         log.info("Call to: LookupService.getEmailCredentials()");
         EmailCredentialsResponse result = null;
         try {
-            Lookup emailLookup = getLookupByName("EMAIL", "EMAIL_CONFIGURATION");
-            Lookup passwordLookup = getLookupByName("PASSWORD", "EMAIL_CONFIGURATION");
+            Lookup emailLookup = findByName("EMAIL", "EMAIL_CONFIGURATION");
+            Lookup passwordLookup = findByName("PASSWORD", "EMAIL_CONFIGURATION");
 
             result = new EmailCredentialsResponse(emailLookup.getValue(), passwordLookup.getValue());
 
@@ -190,10 +175,10 @@ public class LookupService {
         log.info("Call to: LookupService.getThinqCredentials()");
         ThinqCredentialsResponse result = null;
         try {
-            Lookup usernameLookup = getLookupByName("USERNAME", "THINQ_CONFIGURATION");
-            Lookup accounIdLookup = getLookupByName("ACCOUNT ID", "THINQ_CONFIGURATION");
-            Lookup tokenLookup = getLookupByName("TOKEN", "THINQ_CONFIGURATION");
-            Lookup ipAddressLookup = getLookupByName("IP_ADDRESS", "THINQ_CONFIGURATION");
+            Lookup usernameLookup = findByName("USERNAME", "THINQ_CONFIGURATION");
+            Lookup accounIdLookup = findByName("ACCOUNT ID", "THINQ_CONFIGURATION");
+            Lookup tokenLookup = findByName("TOKEN", "THINQ_CONFIGURATION");
+            Lookup ipAddressLookup = findByName("IP_ADDRESS", "THINQ_CONFIGURATION");
 
             result = new ThinqCredentialsResponse(usernameLookup.getValue(), accounIdLookup.getValue(), tokenLookup.getValue(), ipAddressLookup.getValue());
 
@@ -211,7 +196,7 @@ public class LookupService {
         String result = null;
         try {
 
-            result = getLookupByName(action, "THINQ_CONFIGURATION").getValue();
+            result = findByName(action, "THINQ_CONFIGURATION").getValue();
 
         } catch (Exception e) {
             log.warn("Exception in: LookupService.getThinqURLByAction()");
@@ -222,16 +207,8 @@ public class LookupService {
         return result;
     }
 
-    public Boolean saveLookup(Lookup lookup) {
-        Boolean result = false;
-        try {
-            this.lookupRepository.save(lookup);
-            result = true;
-        } catch (Exception e) {
-            throw new RequestException("bob.error.LookupService.saveLookup", e.getMessage());
-        }
-
-        return result;
+    public Lookup save(Lookup lookup) {
+        return this.lookupRepository.save(lookup);
     }
     // </editor-fold>
 }
