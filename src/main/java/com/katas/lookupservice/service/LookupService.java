@@ -3,8 +3,8 @@ package com.katas.lookupservice.service;
 
 import com.katas.lookupservice.domain.Lookup;
 import com.katas.lookupservice.dto.CredentialsLookup;
-import com.katas.lookupservice.dto.ThinqCredentialsLookup;
 import com.katas.lookupservice.dto.EmailCredentialsResponse;
+import com.katas.lookupservice.dto.ThinqCredentialsLookup;
 import com.katas.lookupservice.dto.ThinqCredentialsResponse;
 import com.katas.lookupservice.exception.RequestException;
 import com.katas.lookupservice.repository.LookupRepository;
@@ -16,13 +16,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
-
-import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Service
@@ -53,22 +51,20 @@ public class LookupService {
             Lookup emailLookup = getLookupByName("EMAIL", "EMAIL_CONFIGURATION");
             emailLookup.setValue(credentialsLookup.getEmail());
             emailLookup.setModifiedBy(credentialsLookup.getCreatedBy());
-            emailLookup.setModifiedDate(Calendar.getInstance().getTime());
 
             this.lookupRepository.save(emailLookup);
 
             Lookup passwordLookup = getLookupByName("PASSWORD", "EMAIL_CONFIGURATION");
             passwordLookup.setValue(credentialsLookup.getPassword());
             passwordLookup.setModifiedBy(credentialsLookup.getCreatedBy());
-            passwordLookup.setModifiedDate(Calendar.getInstance().getTime());
 
             this.lookupRepository.save(passwordLookup);
 
             list.add(emailLookup);
             list.add(passwordLookup);
         } catch (Exception e) {
-          log.warn("Exception in: LookupService.createLookupCredentialsConfiguration()");
-          throw new RequestException("bob.error.LookupService.createLookupCredentialsConfiguration", e.getMessage());
+            log.warn("Exception in: LookupService.createLookupCredentialsConfiguration()");
+            throw new RequestException("bob.error.LookupService.createLookupCredentialsConfiguration", e.getMessage());
         }
 
         return list;
@@ -82,34 +78,30 @@ public class LookupService {
             Lookup usernameLookup = getLookupByName("USERNAME", "THINQ_CONFIGURATION");
             usernameLookup.setValue(createThinqCredentialsLookup.getUsername());
             usernameLookup.setModifiedBy(createThinqCredentialsLookup.getCreatedBy());
-            usernameLookup.setModifiedDate(Calendar.getInstance().getTime());
 
             this.lookupRepository.save(usernameLookup);
 
             Lookup accountIdLookup = getLookupByName("ACCOUNT ID", "THINQ_CONFIGURATION");
             accountIdLookup.setValue(createThinqCredentialsLookup.getAccountId());
             accountIdLookup.setModifiedBy(createThinqCredentialsLookup.getCreatedBy());
-            accountIdLookup.setModifiedDate(Calendar.getInstance().getTime());
 
             this.lookupRepository.save(accountIdLookup);
 
             Lookup tokenLookup = getLookupByName("TOKEN", "THINQ_CONFIGURATION");
             tokenLookup.setValue(createThinqCredentialsLookup.getToken());
             tokenLookup.setModifiedBy(createThinqCredentialsLookup.getCreatedBy());
-            tokenLookup.setModifiedDate(Calendar.getInstance().getTime());
 
             this.lookupRepository.save(tokenLookup);
 
             Lookup ipAddressLookup = getLookupByName("IP_ADDRESS", "THINQ_CONFIGURATION");
             String oldIP = ipAddressLookup.getValue();
-            if(createThinqCredentialsLookup.getIpAddress() != "-"){
+            if (createThinqCredentialsLookup.getIpAddress() != "-") {
                 ipAddressLookup.setValue(createThinqCredentialsLookup.getIpAddress());
                 ipAddressLookup.setModifiedBy(createThinqCredentialsLookup.getCreatedBy());
-                ipAddressLookup.setModifiedDate(Calendar.getInstance().getTime());
 
-               try{
+                try {
                     ThinqCredentialsResponse credentials = getThinqCredentials();
-                    String url = getThinqURLByAction(ThinQActions.UPDATE_IP_ADDRESS).replace(ThinQActions.ACCOUNT_ID_PARAM,credentials.getAccountId());
+                    String url = getThinqURLByAction(ThinQActions.UPDATE_IP_ADDRESS).replace(ThinQActions.ACCOUNT_ID_PARAM, credentials.getAccountId());
                     url = url.replace(ThinQActions.OLD_IP_PARAM, oldIP);
                     url = url.replace(ThinQActions.NEW_IP_PARAM, createThinqCredentialsLookup.getIpAddress());
 
@@ -122,10 +114,10 @@ public class LookupService {
 
                     String body = this.restTemplate.exchange(url, HttpMethod.PUT, entity, String.class).getBody();
 
-                   this.lookupRepository.save(ipAddressLookup);
-                }catch (Exception e){
+                    this.lookupRepository.save(ipAddressLookup);
+                } catch (Exception e) {
                     log.warn("Exception in: LookupService.createThinqLookupCredentialsConfiguration()");
-                    throw new RequestException("bob.error.LookupService.createThinqLookupCredentialsConfiguration","Error in createThinqLookupCredentialsConfiguration() -> " + e.getCause());
+                    throw new RequestException("bob.error.LookupService.createThinqLookupCredentialsConfiguration", "Error in createThinqLookupCredentialsConfiguration() -> " + e.getCause());
                 }
             }
 
@@ -147,8 +139,8 @@ public class LookupService {
         try {
             list = this.lookupRepository.findByCategoryAndDeletedFalseOrderByOrdinalAsc(category);
         } catch (Exception e) {
-          log.warn("Exception in: LookupService.getLookupListFromCategory()");
-           throw new RequestException("bob.error.LookupService.getLookupListFromCategory", e.getMessage());
+            log.warn("Exception in: LookupService.getLookupListFromCategory()");
+            throw new RequestException("bob.error.LookupService.getLookupListFromCategory", e.getMessage());
         }
         return list;
     }
@@ -168,28 +160,13 @@ public class LookupService {
 
     public Lookup getLookupByName(String name, String category) {
         log.info("Call to: LookupService.getLookupByName()");
-        Lookup result = null;
-        try {
-            result = this.lookupRepository.findByNameAndCategory(name, category);
-        } catch (Exception e) {
-            log.warn("Exception in: LookupService.getLookupByName()");
-            throw new RequestException("bob.error.LookupService.getLookupByName", e.getMessage());
-        }
-
-        return result;
+        //TODO we  have to update this inn the future
+        return this.lookupRepository.findByNameAndCategory(name, category).orElse(null);
     }
 
     public Lookup getLookupByValue(Long value, String category) {
-        log.info("Call to: LookupService.getLookupByValue()");
-        Lookup result = null;
-        try {
-            result = this.lookupRepository.findByOrdinalAndCategory(value, category);
-        } catch (Exception e) {
-            log.warn("Exception in: LookupService.getLookupByValue()");
-            throw new RequestException("bob.error.LookupService.getLookupByValue", e.getMessage());
-        }
-
-        return result;
+        return this.lookupRepository.findByOrdinalAndCategory(value, category)
+                .orElseThrow(() -> new RuntimeException(String.format("Lookup with ordinal %1d and category %2s not found", value, category)));
     }
 
     public EmailCredentialsResponse getEmailCredentials() {
@@ -245,7 +222,7 @@ public class LookupService {
         return result;
     }
 
-    public Boolean saveLookup(Lookup lookup){
+    public Boolean saveLookup(Lookup lookup) {
         Boolean result = false;
         try {
             this.lookupRepository.save(lookup);

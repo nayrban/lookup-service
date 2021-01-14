@@ -1,6 +1,9 @@
 package com.katas.lookupservice.domain;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 
 @Entity
@@ -16,7 +19,7 @@ public class Lookup {
     @Column(name = "MODIFIED_BY")
     private Long modifiedBy;
     @Column(name = "MODIFIED_DATE")
-    private Date modifiedDate;
+    private Timestamp modifiedDate;
 
     private Boolean deleted;
 
@@ -69,11 +72,11 @@ public class Lookup {
         this.modifiedBy = modifiedBy;
     }
 
-    public Date getModifiedDate() {
+    public Timestamp getModifiedDate() {
         return modifiedDate;
     }
 
-    public void setModifiedDate(Date modifiedDate) {
+    public void setModifiedDate(Timestamp modifiedDate) {
         this.modifiedDate = modifiedDate;
     }
 
@@ -83,5 +86,12 @@ public class Lookup {
 
     public void setDeleted(Boolean deleted) {
         this.deleted = deleted;
+    }
+
+    @PrePersist
+    public void addTimestamp() {
+        Date date = Date.from(LocalDate.now().atStartOfDay()
+                .atZone(ZoneId.systemDefault()).toInstant());
+        this.modifiedDate = new Timestamp(date.getTime());
     }
 }

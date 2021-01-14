@@ -53,14 +53,12 @@ public class OldLookupService {
             Lookup emailLookup = getLookupByName("EMAIL", "EMAIL_CONFIGURATION");
             emailLookup.setValue(credentialsLookup.getEmail());
             emailLookup.setModifiedBy(credentialsLookup.getCreatedBy());
-            emailLookup.setModifiedDate(Calendar.getInstance().getTime());
 
             this.lookupRepository.save(emailLookup);
 
             Lookup passwordLookup = getLookupByName("PASSWORD", "EMAIL_CONFIGURATION");
             passwordLookup.setValue(credentialsLookup.getPassword());
             passwordLookup.setModifiedBy(credentialsLookup.getCreatedBy());
-            passwordLookup.setModifiedDate(Calendar.getInstance().getTime());
 
             this.lookupRepository.save(passwordLookup);
 
@@ -82,21 +80,18 @@ public class OldLookupService {
             Lookup usernameLookup = getLookupByName("USERNAME", "THINQ_CONFIGURATION");
             usernameLookup.setValue(createThinqCredentialsLookup.getUsername());
             usernameLookup.setModifiedBy(createThinqCredentialsLookup.getCreatedBy());
-            usernameLookup.setModifiedDate(Calendar.getInstance().getTime());
 
             this.lookupRepository.save(usernameLookup);
 
             Lookup accountIdLookup = getLookupByName("ACCOUNT ID", "THINQ_CONFIGURATION");
             accountIdLookup.setValue(createThinqCredentialsLookup.getAccountId());
             accountIdLookup.setModifiedBy(createThinqCredentialsLookup.getCreatedBy());
-            accountIdLookup.setModifiedDate(Calendar.getInstance().getTime());
 
             this.lookupRepository.save(accountIdLookup);
 
             Lookup tokenLookup = getLookupByName("TOKEN", "THINQ_CONFIGURATION");
             tokenLookup.setValue(createThinqCredentialsLookup.getToken());
             tokenLookup.setModifiedBy(createThinqCredentialsLookup.getCreatedBy());
-            tokenLookup.setModifiedDate(Calendar.getInstance().getTime());
 
             this.lookupRepository.save(tokenLookup);
 
@@ -105,7 +100,6 @@ public class OldLookupService {
             if(createThinqCredentialsLookup.getIpAddress() != "-"){
                 ipAddressLookup.setValue(createThinqCredentialsLookup.getIpAddress());
                 ipAddressLookup.setModifiedBy(createThinqCredentialsLookup.getCreatedBy());
-                ipAddressLookup.setModifiedDate(Calendar.getInstance().getTime());
 
                try{
                     ThinqCredentialsResponse credentials = getThinqCredentials();
@@ -171,7 +165,7 @@ public class OldLookupService {
         this.logger.info("Call to: LookupService.getLookupByName()");
         Lookup result = null;
         try {
-            result = this.lookupRepository.findByNameAndCategory(name, category);
+            result = this.lookupRepository.findByNameAndCategory(name, category).orElse(null);
         } catch (Exception e) {
             this.logger.warn("Exception in: LookupService.getLookupByName()");
             throw new RequestException("bob.error.LookupService.getLookupByName", e.getMessage());
@@ -184,7 +178,7 @@ public class OldLookupService {
         this.logger.info("Call to: LookupService.getLookupByValue()");
         Lookup result = null;
         try {
-            result = this.lookupRepository.findByOrdinalAndCategory(value, category);
+            result = this.lookupRepository.findByOrdinalAndCategory(value, category).orElse(null);;
         } catch (Exception e) {
             this.logger.warn("Exception in: LookupService.getLookupByValue()");
             throw new RequestException("bob.error.LookupService.getLookupByValue", e.getMessage());
