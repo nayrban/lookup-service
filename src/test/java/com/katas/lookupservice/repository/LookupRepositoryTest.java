@@ -1,12 +1,14 @@
 package com.katas.lookupservice.repository;
 
 import com.katas.lookupservice.domain.Lookup;
+import com.katas.lookupservice.utils.LookupUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +22,7 @@ public class LookupRepositoryTest {
 
     @Autowired
     private LookupRepository lookupRepository;
+    private Long modifiedBy = 1L;
 
     @Test
     public void whenFindBy_thenReturnNull() {
@@ -32,7 +35,7 @@ public class LookupRepositoryTest {
 
     @Test
     public void whenFindByNameAndCategory_thenReturnLookup() {
-        Lookup newEmailLookup = lookup("EMAIL", "EMAIL_CONFIGURATION", "system@demo.com", 1L);
+        Lookup newEmailLookup = LookupUtils.toLookup("EMAIL", "EMAIL_CONFIGURATION", "system@demo.com", 1L, modifiedBy);
         lookupRepository.save(newEmailLookup);
 
         Optional<Lookup> emailLookup = lookupRepository.findByNameAndCategory("EMAIL", "EMAIL_CONFIGURATION");
@@ -41,7 +44,7 @@ public class LookupRepositoryTest {
 
     @Test
     public void whenFindByOrdinal_thenReturnLookup() {
-        Lookup newEmailLookup = lookup("SMS", "NOTIFICATIONS", "sms_url", 2L);
+        Lookup newEmailLookup = LookupUtils.toLookup("SMS", "NOTIFICATIONS", "sms_url", 2L, modifiedBy);
         lookupRepository.save(newEmailLookup);
 
         Optional<Lookup> emailLookup = lookupRepository.findByOrdinalAndCategory(2L, "NOTIFICATIONS");
@@ -50,9 +53,9 @@ public class LookupRepositoryTest {
 
     @Test
     public void whenFindByCategoryAndExisting_thenReturnAllLookups() {
-        lookupRepository.save(lookup("SMS", "NOTIFICATIONS", "sms_url", 2L));
-        lookupRepository.save(lookup("EMAIL", "NOTIFICATIONS", "email_url", 3L));
-        lookupRepository.save(lookup("CONFIG", "CONFIGURATIONS", "some_config", 4L));
+        lookupRepository.save(LookupUtils.toLookup("SMS", "NOTIFICATIONS", "sms_url", 2L, modifiedBy));
+        lookupRepository.save(LookupUtils.toLookup("EMAIL", "NOTIFICATIONS", "email_url", 3L, modifiedBy));
+        lookupRepository.save(LookupUtils.toLookup("CONFIG", "CONFIGURATIONS", "some_config", 4L, modifiedBy));
 
         List<Lookup> lookups = lookupRepository.findByCategoryAndDeletedFalseOrderByOrdinalAsc("NOTIFICATIONS");
         assertFalse(lookups.isEmpty());
@@ -60,15 +63,16 @@ public class LookupRepositoryTest {
         assertTrue(lookups.stream().noneMatch(item -> item.getCategory().equals("CONFIGURATIONS")));
     }
 
-    private Lookup lookup(String name, String category, String value, Long ordinal) {
-        Lookup lookup = new Lookup();
+    @Test
+    public void whenFindByNamesAndCategory_thenReturnAllLookups() {
+        lookupRepository.save(LookupUtils.toLookup("SMS", "NOTIFICATIONS", "sms_url", 2L, modifiedBy));
+        lookupRepository.save(LookupUtils.toLookup("EMAIL", "NOTIFICATIONS", "email_url", 3L, modifiedBy));
+        lookupRepository.save(LookupUtils.toLookup("CONFIG", "CONFIGURATIONS", "some_config", 4L, modifiedBy));
 
-        lookup.setName(name);
-        lookup.setCategory(category);
-        lookup.setValue(value);
-        lookup.setOrdinal(ordinal);
-        lookup.setModifiedBy(1L);
-        lookup.setDeleted(false);
-        return lookup;
+        List<Lookup> lookups = lookupRepository.findByNameAndCategory(Arrays.asList("SMS", "EMAIL", "CONFIG"), "NOTIFICATIONS");
+        assertEquals(2, lookups.size());
+
+        assertTrue(lookups.stream().noneMatch(item -> item.getCategory().equals("CONFIGURATIONS")));
     }
+
 }
