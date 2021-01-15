@@ -3,8 +3,8 @@ package com.katas.lookupservice.service;
 
 import com.katas.lookupservice.domain.Lookup;
 import com.katas.lookupservice.dto.CredentialsLookup;
-import com.katas.lookupservice.dto.ThinqCredentialsLookup;
 import com.katas.lookupservice.dto.EmailCredentialsResponse;
+import com.katas.lookupservice.dto.ThinqCredentialsLookup;
 import com.katas.lookupservice.dto.ThinqCredentialsResponse;
 import com.katas.lookupservice.exception.RequestException;
 import com.katas.lookupservice.repository.LookupRepository;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
