@@ -5,6 +5,7 @@ import com.katas.lookupservice.dto.ThinqCredentialsLookup;
 import com.katas.lookupservice.dto.ThinqCredentialsResponse;
 import com.katas.lookupservice.utils.LookupUtils;
 import com.katas.lookupservice.utils.ThinQActions;
+import com.katas.lookupservice.utils.ThinQConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,12 +19,8 @@ import java.util.Optional;
 @Service
 public class ThingQConfigurationService {
 
-    public static final String CONFIGURATION = "THINQ_CONFIGURATION";
-    public static final String USERNAME = "USERNAME";
-    public static final String ACCOUNT_ID = "ACCOUNT_ID";
-    public static final String TOKEN = "TOKEN";
-    public static final String IP_ADDRESS = "IP_ADDRESS";
     private static final Long ORDINAL = 1L;
+
     private final LookupService lookupService;
     private final ThingQAPIService thingQAPIService;
 
@@ -50,10 +47,10 @@ public class ThingQConfigurationService {
 
     private ThinqCredentialsResponse save(ThinqCredentialsLookup credentials) {
         Long createdBy = credentials.getCreatedBy();
-        Lookup usernameLookup = toLookup(USERNAME, credentials.getUsername(), createdBy);
-        Lookup accountLookup = toLookup(ACCOUNT_ID, credentials.getAccountId(), createdBy);
-        Lookup tokenLookup = toLookup(TOKEN, credentials.getToken(), createdBy);
-        Lookup addressLookup = toLookup(IP_ADDRESS, credentials.getIpAddress(), createdBy);
+        Lookup usernameLookup = toLookup(ThinQConstants.USERNAME, credentials.getUsername(), createdBy);
+        Lookup accountLookup = toLookup(ThinQConstants.ACCOUNT_ID, credentials.getAccountId(), createdBy);
+        Lookup tokenLookup = toLookup(ThinQConstants.TOKEN, credentials.getToken(), createdBy);
+        Lookup addressLookup = toLookup(ThinQConstants.IP_ADDRESS, credentials.getIpAddress(), createdBy);
         return fromLookup(this.lookupService.saveAll(Arrays.asList(usernameLookup, accountLookup, tokenLookup, addressLookup)));
     }
 
@@ -64,16 +61,16 @@ public class ThingQConfigurationService {
 
     private void updateConfiguration(Lookup lookup, ThinqCredentialsLookup credentials) {
         switch (lookup.getName()) {
-            case USERNAME:
+            case ThinQConstants.USERNAME:
                 lookup.setValue(credentials.getUsername());
                 break;
-            case ACCOUNT_ID:
+            case ThinQConstants.ACCOUNT_ID:
                 lookup.setValue(credentials.getAccountId());
                 break;
-            case TOKEN:
+            case ThinQConstants.TOKEN:
                 lookup.setValue(credentials.getToken());
                 break;
-            case IP_ADDRESS:
+            case ThinQConstants.IP_ADDRESS:
                 updateIpAddressWhenRequired(lookup, credentials);
                 break;
             default:
@@ -98,23 +95,24 @@ public class ThingQConfigurationService {
     }
 
     private Optional<Lookup> getConfigurationValue(String name) {
-        return lookupService.findByNameAndCategory(name, CONFIGURATION);
+        return lookupService.findByNameAndCategory(name, ThinQConstants.CONFIGURATION);
     }
 
     private List<Lookup> getConfigurationValues() {
-        return lookupService.findByNamesAndCategory(Arrays.asList(USERNAME, ACCOUNT_ID, TOKEN, IP_ADDRESS), CONFIGURATION);
+        return lookupService.findByNamesAndCategory(Arrays.asList(ThinQConstants.USERNAME, ThinQConstants.ACCOUNT_ID,
+                ThinQConstants.TOKEN, ThinQConstants.IP_ADDRESS), ThinQConstants.CONFIGURATION);
     }
 
     private ThinqCredentialsResponse fromLookup(List<Lookup> emailConfiguration) {
-        Lookup usernameLookup = LookupUtils.findConfigurationOrThrow(emailConfiguration, USERNAME);
-        Lookup accountIdLookup = LookupUtils.findConfigurationOrThrow(emailConfiguration, ACCOUNT_ID);
-        Lookup tokenLookup = LookupUtils.findConfigurationOrThrow(emailConfiguration, TOKEN);
-        Lookup ipAddressLookup = LookupUtils.findConfigurationOrThrow(emailConfiguration, IP_ADDRESS);
+        Lookup usernameLookup = LookupUtils.findConfigurationOrThrow(emailConfiguration, ThinQConstants.USERNAME);
+        Lookup accountIdLookup = LookupUtils.findConfigurationOrThrow(emailConfiguration, ThinQConstants.ACCOUNT_ID);
+        Lookup tokenLookup = LookupUtils.findConfigurationOrThrow(emailConfiguration, ThinQConstants.TOKEN);
+        Lookup ipAddressLookup = LookupUtils.findConfigurationOrThrow(emailConfiguration, ThinQConstants.IP_ADDRESS);
 
         return new ThinqCredentialsResponse(usernameLookup.getValue(), accountIdLookup.getValue(), tokenLookup.getValue(), ipAddressLookup.getValue());
     }
 
     private Lookup toLookup(String name, String value, Long modifiedBy) {
-        return LookupUtils.toLookup(name, CONFIGURATION, value, ORDINAL, modifiedBy);
+        return LookupUtils.toLookup(name, ThinQConstants.CONFIGURATION, value, ORDINAL, modifiedBy);
     }
 }

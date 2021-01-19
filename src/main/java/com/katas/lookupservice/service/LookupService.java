@@ -1,6 +1,5 @@
 package com.katas.lookupservice.service;
 
-
 import com.katas.lookupservice.domain.Lookup;
 import com.katas.lookupservice.repository.LookupRepository;
 import lombok.extern.slf4j.Slf4j;

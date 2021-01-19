@@ -31,7 +31,6 @@ public class Lookup {
         return id;
     }
 
-
     public String getName() {
         return name;
     }
